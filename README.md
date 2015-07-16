@@ -1,5 +1,11 @@
 ## Overview
+This prototype/proof of concept is a full web application leveraging PHP and MySQL. It contains 3 major components; Dashboard App, Administrative App, and API.
 
+The Administrative app is a mechanism for people to bootstrap or setup all of the database tables and load all of the data.
+
+The API is a collection of queries against the database that are exposed as a JSON API.
+
+The Dashboard app consumes data from the API to present the data.
 
 
 **NOTE: This application works best in a modern web browser (aka > IE 9.0)**
@@ -30,12 +36,27 @@ This was developed using the LAMPP Stack [XAMPP version 5.5.24](https://www.apac
 
 	sudo git clone https://github.com/davidlarrimore/cfpb.git
 
-*PHP.ini needs to be modified to support the amount of data that will be flowing through it. 512 should be enough for most operations.
+* PHP.ini needs to be modified to support the amount of data that will be flowing through it. 512 should be enough for most operations.
 
 	sudo vi /etc/php5/apache2/php.ini
 
-	memory_limit=512M
+	set memory_limit=512M
 
+* My.cnf needs to be modified to support the queries.
+
+	sudo vi /etc/mysql/my.cnf
+
+	change key_buffer              = 128M
+	add innodb_buffer_pool_size = 402653184
+
+* Once you are done both of these tasks, you should restart both services
+
+	sudo /etc/init.d/mysql restart 
+	sudo service apache2 restart
+
+* I have also found a lot of value in increasing the buffer pool size for mysql
+
+	SET GLOBAL innodb_buffer_pool_size=402653184;
 
 
 ### Connect to MYSQL server
@@ -56,6 +77,8 @@ Login to the mysql database and run the following commands to create the cfpb us
 	CREATE DATABASE IF NOT EXISTS `cfpb`;
 	GRANT ALL PRIVILEGES ON `cfpb`.* TO 'cfpb'@'localhost';
 	GRANT ALL PRIVILEGES ON `cfpb\_%`.* TO 'cfpb'@'localhost';
+
+
 
 
 
