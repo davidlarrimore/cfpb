@@ -103,6 +103,7 @@ Login to the mysql database and run the following commands to create the cfpb us
 Depending upon your configuration, you should be able to access the application at http://<hostname>/cfpb/
 
 
+
 #### Load Data into Database
 
 From this point, you can leverage the ./administrator.php url to load the data. The application can handle most of the database creation/setup, but manual data load commands have been provided.
@@ -118,6 +119,10 @@ From this point, you can leverage the ./administrator.php url to load the data. 
 
 
 **NOTE: If you receive an "Row 1 was truncated" error, please look at [this site](http://www.alanjames.org/2009/08/mysql-row-n-was-truncated-a-solution/) for ways to modify the statements to get things working.
+
+
+**NOTE: Depending upon system resources the "load tables and data" function can take a considerable amount of time. Much of this is due to pre-aggregation, indexing, and other performance related functions.
+
 
 
 
