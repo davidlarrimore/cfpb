@@ -21,25 +21,30 @@ This was developed using the LAMPP Stack [XAMPP version 5.5.24](https://www.apac
 * Perl 5.16.3
 
 
-**Note: PHP.ini needs to be modified to support the amount of data that will be flowing through it. 512 should be enough for most operations.
+### LAMPP Installation on Ubuntu 14.04
 
+* [Use this link](http://howtoubuntu.org/how-to-install-lamp-on-ubuntu) to get the base install.
+* install git
+* Navigate to /var/www/
+* Clone the repository
+
+	sudo git clone https://github.com/davidlarrimore/cfpb.git
+
+*PHP.ini needs to be modified to support the amount of data that will be flowing through it. 512 should be enough for most operations.
+
+	sudo vi /etc/php5/apache2/php.ini
+	
 	memory_limit=512M
 
 
-### Install Code Baseline
 
-Download code baseline from Github, unzip, and place inside htdocs or www folder (depending upon Apache distribution)
-
+### Connect to MYSQL server
 
 
-### Setup Database
-
-
-#### XAMPP Access on OSX
-
-If using OSX to locally connect to MySQL database, use the following command to envoke xampp
+**Note**: If using OSX to locally connect to MySQL database, use the following command to envoke xampp
 
 	/Applications/XAMPP/xamppfiles/bin/mysql -u root
+
 
 
 #### Create Database Account
