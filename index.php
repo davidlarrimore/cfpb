@@ -5,41 +5,53 @@
     $password = "cfpb";
     $hostname = "localhost";
     $database = "cfpb";
+    mysqli_report(MYSQLI_REPORT_STRICT);
 
-    $db = new mysqli($hostname, $username, $password, $database);
+    try {
+         $db = new mysqli($hostname, $username, $password, $database);
 
-    /* check connection */
-    if ($db->connect_errno) {
+        /* check connection */
+        if ($db->connect_error) {
+            $mysqlError = true;
+            $mysqlErrorMessage = $db->connect_error;
+            //exit();
+        }
+    } catch (Exception $e ) {
         $mysqlError = true;
-        $mysqlErrorMessage = $db->connect_error;
-        exit();
+        $mysqlErrorMessage = "Could not connect to database";
+         //exit;
     }
 
     $DBConfig = true;
 
-    //Code added to check to see if site is setup
-    $result = $db->query("SHOW TABLES LIKE 'geography';");
-    if($result->num_rows == 0) $DBConfig = false;
-    $result->close();
 
-    $result = $db->query("SHOW TABLES LIKE 'acs_estimate';");
-    if($result->num_rows == 0) $DBConfig = false;
-    $result->close();
+    if(!$mysqlError){
 
-    $result = $db->query("SHOW TABLES LIKE 'acs_margin_of_error';");
-    if($result->num_rows == 0) $DBConfig = false;
-    $result->close();
+        //Code added to check to see if site is setup
+        $result = $db->query("SHOW TABLES LIKE 'geography';");
+        if($result->num_rows == 0) $DBConfig = false;
+        $result->close();
 
+        $result = $db->query("SHOW TABLES LIKE 'acs_estimate';");
+        if($result->num_rows == 0) $DBConfig = false;
+        $result->close();
 
-    $result = $db->query("SHOW TABLES LIKE 'consumer_complaint';");
-    if($result->num_rows == 0) $DBConfig = false;
-    $result->close();
+        $result = $db->query("SHOW TABLES LIKE 'acs_margin_of_error';");
+        if($result->num_rows == 0) $DBConfig = false;
+        $result->close();
 
 
-    $result = $db->query("SHOW TABLES LIKE 'consumer_acs_usa_ratio';");
-    if($result->num_rows == 0) $DBConfig = false;
-    $result->close();
+        $result = $db->query("SHOW TABLES LIKE 'consumer_complaint';");
+        if($result->num_rows == 0) $DBConfig = false;
+        $result->close();
 
+
+        $result = $db->query("SHOW TABLES LIKE 'consumer_acs_usa_ratio';");
+        if($result->num_rows == 0) $DBConfig = false;
+        $result->close();
+    }else{
+        $DBConfig = false;
+    }
 
 ?>
 
@@ -120,7 +132,7 @@
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <?php echo $mysqlErrorMessage;?>
+                        Error: <?php echo $mysqlErrorMessage;?>
                     </div>
                 </div>
             </div>

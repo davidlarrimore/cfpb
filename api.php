@@ -21,7 +21,7 @@
 		if ($result = $db->query(getQuery($_GET["query"]))) {
 
 		    while($row = $result->fetch_array(MYSQL_ASSOC)) {
-		            $myArray[] = $row;
+		    	$myArray[] = $row;
 		    }
 		    header('Content-Type: application/json');
 		    echo json_encode($myArray);

@@ -1,21 +1,28 @@
 <?php
+    include './helpers/dbHelper.php';
     $mysqlError = false;
     $username = "cfpb";
     $password = "cfpb";
     $hostname = "localhost";
     $database = "cfpb";
+    mysqli_report(MYSQLI_REPORT_STRICT);
 
-    $conn = mysql_connect($hostname, $username, $password,false,128) or die("Connecting to MySQL failed");
-    mysql_select_db($database, $conn) or die("Selecting MySQL database failed");
 
-    $db = new mysqli($hostname, $username, $password, $database);
+    $mysqlError = false;
+    $mysqlErrorMessage = "";  
+    $consumerComplaintTableRowCount = 0;
+    $consumerComplaintTableCheck = false;
+    $acsEstimateTableRowCount = 0;
+    $acsEstimateTableCheck = false;
+    $acsMarginOfErrorTableRowCount = 0;
+    $acsMarginOfErrorTableCheck = false;
+    $geographyTableRowCount = 0;
+    $geographyTableCheck = false;
+    $consumerACSUSARatioTableRowCount = 0;
+    $consumerACSUSARatioTableCheck = false;
+    $consumerComplaintIndexCheck = false;
+    $geographyIndexCheck = false;
 
-    /* check connection */
-    if ($db->connect_errno) {
-        $mysqlError = true;
-        $mysqlErrorMessage = $db->connect_error;
-        exit();
-    }
 
     $geographyDataFile = "./data/g20135us-baked.csv";
     $acsEstimateDataFile = "./data/e20135us0015000-baked.csv";
@@ -23,295 +30,285 @@
     $consumerComplaintDataFile = "./data/Consumer_Complaints.csv";
 
 
-    //If Posted, we load
-    if ( !empty($_POST) && !$mysqlError) {
 
-        //Part 0: drop tables
-        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.geography;") === TRUE) {
-        }else{
+
+    try {
+         $db = new mysqli($hostname, $username, $password, $database);
+
+        /* check connection */
+        if ($db->connect_error) {
             $mysqlError = true;
-            $mysqlErrorMessage = "Could not drop geography table";           
+            $mysqlErrorMessage = $db->connect_error;
+            //exit();
+        }
+    } catch (Exception $e ) {
+        $mysqlError = true;
+        $mysqlErrorMessage = "Could not connect to database";
+         //exit;
+    }
+
+
+
+    if(!$mysqlError){
+        //If Posted, we load
+        if ( !empty($_POST) && !$mysqlError) {
+
+            //Part 0: drop tables
+            if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.geography;") === TRUE) {
+            }else{
+                $mysqlError = true;
+                $mysqlErrorMessage = "Could not drop geography table";           
+            }
+
+            if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.acs_estimate;") === TRUE) {
+            }else{
+                $mysqlError = true;
+                $mysqlErrorMessage = "Could not drop acs_estimate table";           
+            }
+
+            if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.acs_margin_of_error;") === TRUE) {
+            }else{
+                $mysqlError = true;
+                $mysqlErrorMessage = "Could not drop acs_margin_of_error table";           
+            }
+
+            if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.consumer_complaint;") === TRUE) {
+            }else{
+                $mysqlError = true;
+                $mysqlErrorMessage = "Could not drop consumer_complaint table";           
+            }
+
+            if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.consumer_acs_usa_ratio;") === TRUE) {
+            }else{
+                $mysqlError = true;
+                $mysqlErrorMessage = "Could not drop consumer_acs_usa_ratio table";           
+            }
+
+
+            //Part 1: Create Tables
+            $sql = file_get_contents("./ddl/create_geography.sql");
+            if (mysqli_query($db, $sql) === TRUE) {
+            }else{
+                $mysqlError = true;
+                $mysqlErrorMessage = "Could not create geography table";           
+            }
+
+
+            $sql = file_get_contents("./ddl/create_geography_index.sql");
+            if (mysqli_query($db, $sql) === TRUE) {            
+            }else{
+                $mysqlError = true;
+                $mysqlErrorMessage = "Could not create geography table index";       
+            }      
+
+
+            $sql = file_get_contents("./ddl/create_acs_estimate.sql");
+            if (mysqli_query($db, $sql) === TRUE) {
+            }else{
+                $mysqlError = true;
+                $mysqlErrorMessage = "Could not create acs_estimate table";           
+            }
+
+
+            $sql = file_get_contents("./ddl/create_acs_margin_of_error.sql");
+            if (mysqli_query($db, $sql) === TRUE) {
+            }else{
+                $mysqlError = true;
+                $mysqlErrorMessage = "Could not create acs_margin_of_error table";           
+            }       
+
+
+            $sql = file_get_contents("./ddl/create_consumer_complaint.sql");
+            if (mysqli_query($db, $sql) === TRUE) {
+            }else{
+                $mysqlError = true;
+                $mysqlErrorMessage = "Could not create consumer_complaint table";           
+            }  
+
+
+
+            $sql = file_get_contents("./ddl/create_consumer_complaint_index.sql");
+            if (mysqli_query($db, $sql) === TRUE) {            
+            }else{
+                $mysqlError = true;
+                $mysqlErrorMessage = "Could not create consumer_complaint table index";       
+            }    
+
+
+
+            $sql = file_get_contents("./ddl/create_consumer_acs_usa_ratio.sql");
+            if (mysqli_query($db, $sql) === TRUE) {
+            }else{
+                $mysqlError = true;
+                $mysqlErrorMessage = "Could not create consumer_acs_usa_ratio table";           
+            }  
+
+
+
+
+            if(!$mysqlError){
+
+                //PART 2: Query to load geography table
+                
+                if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES") === TRUE) {
+                }else{
+                    $mysqlError = true;
+                    $mysqlErrorMessage = "Could not load geography table";           
+                }
+
+                if (getRowCount($db, "geography") == 0) {
+                    if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES") === TRUE) {
+                    }else{
+                        $mysqlError = true;
+                        $mysqlErrorMessage = "Could not drop load geography table";           
+                    }       
+                }
+
+
+
+                //PART 3: Query to load Estimates table
+                if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES") === TRUE) {
+                }else{
+                    $mysqlError = true;
+                    $mysqlErrorMessage = "Could not load acs_estimate table";           
+                }
+
+                if (getRowCount($db, "acs_estimate") == 0) {
+                    if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES") === TRUE) {
+                    }else{
+                        $mysqlError = true;
+                        $mysqlErrorMessage = "Could not drop load acs_estimate table";           
+                    }       
+                }
+
+
+                //PART 4: Query to load Margin of Error
+                if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES") === TRUE) {
+                }else{
+                    $mysqlError = true;
+                    $mysqlErrorMessage = "Could not load acs_margin_of_error table";           
+                }
+
+                if (getRowCount($db, "acs_margin_of_error") == 0) {
+                    if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES") === TRUE) {
+                    }else{
+                        $mysqlError = true;
+                        $mysqlErrorMessage = "Could not drop load acs_margin_of_error table";           
+                    }       
+                }
+
+
+
+
+                //PART 5: Query to load consumer complaints table
+                if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES") === TRUE) {
+                }else{
+                    $mysqlError = true;
+                    $mysqlErrorMessage = "Could not load consumer_complaint table";           
+                }
+
+                if (getRowCount($db, "consumer_complaint") == 0) {
+                    if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES") === TRUE) {
+                    }else{
+                        $mysqlError = true;
+                        $mysqlErrorMessage = "Could not drop load consumer_complaint table";           
+                    }       
+                }
+
+
+                
+                //PART 6: Aggregated Tables
+                if (mysqli_query($db, file_get_contents("./queries/load_consumer_acs_usa_ratio.sql")) === TRUE) {
+                }else{
+                    $mysqlError = true;
+                    $mysqlErrorMessage = "Could not load consumer_acs_usa_ratio table";           
+                }
+
+            }
+
+
         }
 
-        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.acs_estimate;") === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not drop acs_estimate table";           
-        }
 
-        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.acs_margin_of_error;") === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not drop acs_margin_of_error table";           
-        }
+        /*
+        * GETTING STATISTICS
+        *
+        * This process includes checking each table to see if the table exists. If so, it gets statistices
+        */
 
-        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.consumer_complaint;") === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not drop consumer_complaint table";           
-        }
 
-        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.consumer_acs_usa_ratio;") === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not drop consumer_acs_usa_ratio table";           
+        //GEOGRAPHY TABLE
+        $geographyTableRowCount = 0;
+        $geographyTableCheck = false;
+        if(validateIfTableExists($db, "geography")){
+            $geographyTableCheck = true;
+            $rowCount = getRowCount($db, "geography");
+            if($rowCount)
+                $geographyTableRowCount = $rowCount;
         }
 
 
-        //Part 1: Create Tables
-        $sql = file_get_contents("./ddl/create_geography.sql");
-        if (mysqli_query($db, $sql) === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not create geography table";           
+
+        //ACS_ESTIMATE TABLE
+        $acsEstimateTableRowCount = 0;
+        $acsEstimateTableCheck = false;
+        if(validateIfTableExists($db, "acs_estimate")){
+            $acsEstimateTableCheck = true;
+            $rowCount = getRowCount($db, "acs_estimate");
+            if($rowCount)
+                $acsEstimateTableRowCount = $rowCount;
         }
 
 
-        $sql = file_get_contents("./ddl/create_geography_index.sql");
-        if (mysqli_query($db, $sql) === TRUE) {            
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not create geography table index";       
-        }      
 
-
-        $sql = file_get_contents("./ddl/create_acs_estimate.sql");
-        if (mysqli_query($db, $sql) === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not create acs_estimate table";           
-        }
-
-
-        $sql = file_get_contents("./ddl/create_acs_margin_of_error.sql");
-        if (mysqli_query($db, $sql) === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not create acs_margin_of_error table";           
-        }       
-
-
-        $sql = file_get_contents("./ddl/create_consumer_complaint.sql");
-        if (mysqli_query($db, $sql) === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not create consumer_complaint table";           
-        }  
-
-
-
-        $sql = file_get_contents("./ddl/create_consumer_complaint_index.sql");
-        if (mysqli_query($db, $sql) === TRUE) {            
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not create consumer_complaint table index";       
+        //ACS_MARGIN_OF_ERROR TABLE
+        $acsMarginOfErrorTableRowCount = 0;
+        $acsMarginOfErrorTableCheck = false;
+        if(validateIfTableExists($db, "acs_margin_of_error")){
+            $acsMarginOfErrorTableCheck = true;
+            $rowCount = getRowCount($db, "acs_margin_of_error");
+            if($rowCount)
+                $acsMarginOfErrorTableRowCount = $rowCount;
         }    
 
 
+        //CONSUMER_COMPLAINTS TABLE
+        $consumerComplaintTableRowCount = 0;
+        $consumerComplaintTableCheck = false;
+        if(validateIfTableExists($db, "consumer_complaint")){
+            $consumerComplaintTableCheck = true;
+            $rowCount = getRowCount($db, "consumer_complaint");
+            if($rowCount)
+                $consumerComplaintTableRowCount = $rowCount;
+        }   
 
-        $sql = file_get_contents("./ddl/create_consumer_acs_usa_ratio.sql");
-        if (mysqli_query($db, $sql) === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not create consumer_acs_usa_ratio table";           
+
+
+
+        //Checking for geo join index
+        $geographyIndexCheck = false;
+        if(validateIfTableIndexExists($db, "geography", "geo_join_index")){
+            $consumerComplaintTableCheck = true;
+        }  
+
+        //Checking for cc join index
+        $consumerComplaintIndexCheck = false;
+        if(validateIfTableIndexExists($db, "consumer_complaint", "cc_join_index")){
+            $consumerComplaintIndexCheck = true;
         }  
 
 
-
-
-        if(!$mysqlError){
-
-            //PART 2: Query to load geography table
-            $sql = "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES"; 
-            mysql_query($sql) or die(mysql_error()); 
-
-            //lets check to see if data was loaded, noticed difference between windows/osx/linux
-            $sql = "SELECT count(*) as `count` FROM cfpb.geography"; 
-            $result = mysql_query($sql, $conn); 
-
-            $geographyTableRowCount = mysql_fetch_array( $result );
-
-            if ($geographyTableRowCount = 0) {
-                $sql = "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
-                mysql_query($sql) or die(mysql_error()); 
-            }
-
-
-            //PART 3: Query to load Estimates table
-            $sql = "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
-            mysql_query($sql) or die(mysql_error()); 
-
-            //lets check to see if data was loaded, noticed difference between windows/osx/linux
-            $sql = "SELECT count(*) as `count` FROM cfpb.acs_estimate"; 
-            $result = mysql_query($sql, $conn); 
-
-            $acsEstimateTableRowCount = mysql_fetch_array( $result );
-
-            if ($acsEstimateTableRowCount = 0) {
-                $sql = "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
-                mysql_query($sql) or die(mysql_error()); 
-            }
-
-
-
-
-            //PART 4: Query to load Margin of Error
-            $sql = "LOAD DATA LOCAL INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
-            mysql_query($sql) or die(mysql_error()); 
-
-            //lets check to see if data was loaded, noticed difference between windows/osx/linux
-            $sql = "SELECT count(*) as `count` FROM cfpb.acs_estimate"; 
-            $result = mysql_query($sql, $conn); 
-
-            $acsEstimateTableRowCount = mysql_fetch_array( $result );
-
-            if ($acsEstimateTableRowCount = 0) {
-                $sql = "LOAD DATA LOCAL INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
-                mysql_query($sql) or die(mysql_error()); 
-            }
-
-
-
-            //PART 5: Query to load consumer complaints table
-            $sql = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
-            mysql_query($sql) or die(mysql_error()); 
-
-            //lets check to see if data was loaded, noticed difference between windows/osx/linux
-            $sql = "SELECT count(*) as `count` FROM cfpb.consumer_complaint"; 
-            $result = mysql_query($sql, $conn); 
-
-            $consumerComplaintTableRowCount = mysql_fetch_array( $result );
-
-            if ($consumerComplaintTableRowCount = 0) {
-                $sql = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
-                mysql_query($sql) or die(mysql_error()); 
-            }
-
-            
-            //PART 6: Aggregated Tables
-            $sql = file_get_contents("./queries/load_consumer_acs_usa_ratio.sql"); 
-            mysql_query($sql) or die(mysql_error()); 
-        }
-
-
-    }
-
-
-    /*
-    * GETTING STATISTICS
-    *
-    * This process includes checking each table to see if the table exists. If so, it gets statistices
-    */
-
-
-    //GEOGRAPHY TABLE
-    $val = mysql_query('select 1 from cfpb.geography LIMIT 1');
-    if($val !== FALSE)
-    {
-        //GETTING STATISTICS
-        //Get Geography Table Row Count
-        $sql = "SELECT count(*) as `count` FROM cfpb.geography"; 
-        $result = mysql_query($sql, $conn); 
-        $geographyTableRowCount = mysql_fetch_array($result)['count'];
-        $geographyTableCheck = true;
-    }
-    else
-    {
-        $geographyTableRowCount = 0;
-        $geographyTableCheck = false;
-    }
-
-
-    //ACS_ESTIMATE TABLE
-    $val = mysql_query('select 1 from cfpb.acs_estimate LIMIT 1');
-    if($val !== FALSE)
-    {
-        //GETTING STATISTICS
-        //Get Geography Table Row Count
-        $sql = "SELECT count(*) as `count` FROM cfpb.acs_estimate"; 
-        $result = mysql_query($sql, $conn); 
-        $acsEstimateTableRowCount = mysql_fetch_array($result)['count'];
-        $acsEstimateTableCheck = true;
-    }
-    else
-    {
-        $acsEstimateTableRowCount = 0;
-        $acsEstimateTableCheck = false;
-    }
-
-    //ACS_MARGIN_OF_ERROR TABLE
-    $val = mysql_query('select 1 from cfpb.acs_margin_of_error LIMIT 1');
-    if($val !== FALSE)
-    {
-        //GETTING STATISTICS
-        //Get Geography Table Row Count
-        $sql = "SELECT count(*) as `count` FROM cfpb.acs_margin_of_error"; 
-        $result = mysql_query($sql, $conn); 
-        $acsMarginOfErrorTableRowCount = mysql_fetch_array($result)['count'];
-        $acsMarginOfErrorTableCheck = true;
-    }
-    else
-    {
-        $acsMarginOfErrorTableRowCount = 0;
-        $acsMarginOfErrorTableCheck = false;
-    }
-
-    //CONSUMER_COMPLAINTS TABLE
-    $val = mysql_query('select 1 from cfpb.consumer_complaint LIMIT 1');
-    if($val !== FALSE)
-    {
-        //GETTING STATISTICS
-        //Get Geography Table Row Count
-        $sql = "SELECT count(*) as `count` FROM cfpb.consumer_complaint"; 
-        $result = mysql_query($sql, $conn); 
-        $consumerComplaintTableRowCount = mysql_fetch_array($result)['count'];
-        $consumerComplaintTableCheck = true;
-    }
-    else
-    {
-        $consumerComplaintTableRowCount = 0;
-        $consumerComplaintTableCheck = false;
-    }
-
-
-    //Checking for geo join index
-    $result = $db->query("SHOW INDEXES from cfpb.geography WHERE Key_name LIKE 'geo_join_index';");
-    if($result->num_rows == 0) {
-        $geographyIndexCheck = false;
-    } else {
-        $geographyIndexCheck = true;
-    }
-
-
-    $result = $db->query("SHOW INDEXES from cfpb.consumer_complaint WHERE Key_name LIKE 'cc_join_index';");
-    if($result->num_rows == 0) {
-        $consumerComplaintIndexCheck = false;
-    } else {
-        $consumerComplaintIndexCheck = true;
-    }
-    //$result->close();
-
-
-    //AGGREGATED TABLE TABLE
-    $val = mysql_query('select 1 from cfpb.consumer_acs_usa_ratio LIMIT 1');
-    if($val !== FALSE)
-    {
-        //GETTING STATISTICS
-        //Get Geography Table Row Count
-        $sql = "SELECT count(*) as `count` FROM cfpb.consumer_acs_usa_ratio"; 
-        $result = mysql_query($sql, $conn); 
-        $consumerACSUSARatioTableRowCount = mysql_fetch_array($result)['count'];
-        $consumerACSUSARatioTableCheck = true;
-    }
-    else
-    {
+        //AGGREGATED TABLE TABLE
         $consumerACSUSARatioTableRowCount = 0;
         $consumerACSUSARatioTableCheck = false;
+        if(validateIfTableExists($db, "consumer_acs_usa_ratio")){
+            $consumerACSUSARatioTableCheck = true;
+            $rowCount = getRowCount($db, "consumer_acs_usa_ratio");
+            if($rowCount)
+                $consumerACSUSARatioTableRowCount = $rowCount;
+        }   
+
     }
-
-
-    mysql_close($conn);
-
 ?>
 
 <!DOCTYPE html>
