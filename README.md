@@ -23,8 +23,53 @@ This was developed using the LAMPP Stack [XAMPP version 5.5.24](https://www.apac
 	memory_limit=512M
 
 
+### Install Code Baseline
 
-### Data Prep
+Download code baseline from Github, unzip, and place inside htdocs or www folder (depending upon Apache distribution)
+
+
+
+### Setup Database
+
+
+#### XAMPP Access on OSX
+
+If using OSX to locally connect to MySQL database, use the following command to envoke xampp
+
+	/Applications/XAMPP/xamppfiles/bin/mysql -u root
+
+
+#### Create Database Account
+
+Login to the mysql database and run the following commands to create the cfpb user and database
+
+	CREATE USER 'cfpb'@'localhost' IDENTIFIED BY 'cfpb';
+	GRANT USAGE ON *.* TO 'cfpb'@'localhost' IDENTIFIED BY 'cfpb' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
+	CREATE DATABASE IF NOT EXISTS `cfpb`;
+	GRANT ALL PRIVILEGES ON `cfpb`.* TO 'cfpb'@'localhost';
+	GRANT ALL PRIVILEGES ON `cfpb\_%`.* TO 'cfpb'@'localhost';
+
+
+
+#### Load Data into Database
+
+From this point, you can leverage the ./administrator.php url to load the data. The application can handle most of the database creation/setup, but manual data load commands have been provided.
+
+
+	LOAD DATA LOCAL INFILE '<root directory>/cfpb/data/e20135us0015000-baked.csv' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+	LOAD DATA LOCAL INFILE '<root directory>/cfpb/data/m20135us0015000-baked.csv' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+	LOAD DATA LOCAL INFILE '<root directory>/cfpb/data/Consumer_Complaints.csv' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+	LOAD DATA LOCAL INFILE '<root directory>/cfpb/data/g20135us.csv.csv' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+
+**NOTE: If you receive an "Row 1 was truncated" error, please look at [this site](http://www.alanjames.org/2009/08/mysql-row-n-was-truncated-a-solution/) for ways to modify the statements to get things working.
+
+
+
+### Data Preparation
 
 As this is a prototype/demo/proof of concept project, manual data preparation activities were performed to reduce over all development time. More formal implementations should include automated data preparation and/or more complex database architecture to reduce error and duplicative work.
 
@@ -60,50 +105,9 @@ No specific data prep activites are required for this file. Data retrieved from 
 
 
 
-### Database Setup
-
-
-#### XAMPP Access on OSX
-
-If using OSX to locally connect to MySQL database, use the following command to envoke xampp
-
-	/Applications/XAMPP/xamppfiles/bin/mysql -u root
-
-
-#### Create Database Account
-
-Login to the mysql database and run the following commands to create the cfpb user and database
-
-	CREATE USER 'cfpb'@'localhost' IDENTIFIED BY 'cfpb';
-	GRANT USAGE ON *.* TO 'cfpb'@'localhost' IDENTIFIED BY 'cfpb' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
-	CREATE DATABASE IF NOT EXISTS `cfpb`;
-	GRANT ALL PRIVILEGES ON `cfpb`.* TO 'cfpb'@'localhost';
-	GRANT ALL PRIVILEGES ON `cfpb\_%`.* TO 'cfpb'@'localhost';
-
-
-
-#### Load Data
-
-From this point, you can leverage the ./administrator.php url to load the data. The application can handle most of the database creation/setup, but manual data load commands have been provided.
-
-
-	LOAD DATA LOCAL INFILE '<root directory>/cfpb/data/e20135us0015000-baked.csv' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES;
-
-	LOAD DATA LOCAL INFILE '<root directory>/cfpb/data/m20135us0015000-baked.csv' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES;
-
-	LOAD DATA LOCAL INFILE '<root directory>/cfpb/data/Consumer_Complaints.csv' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES;
-
-	LOAD DATA LOCAL INFILE '<root directory>/cfpb/data/g20135us.csv.csv' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES;
-
-
-**NOTE: If you receive a "" error, please look at [this site](http://www.alanjames.org/2009/08/mysql-row-n-was-truncated-a-solution/) for ways to modify the statements to get things working.
-
-
-
-
-
 ### Libraries Used
 
 * Twitter Bootstrap 3
+* Google Charts API
 
 

@@ -87,8 +87,8 @@
         </div>
          <div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li><a href="./">Dashboard</a></li>
-            <li class="active"><a href="./admin.php">Administration <span class="sr-only">(current)</span></a></li>
+            <li class="active"><a href="./">Dashboard</a></li>
+            <li><a href="./admin.php">Administration <span class="sr-only">(current)</span></a></li>
           </ul>         
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
@@ -144,9 +144,18 @@
 
         <div class="row">
             <div class="col-md-6">
-            <div class="panel panel-default">
-              <div class="panel-heading">States with the Higest number of complaints</div>
-              <div class="panel-body" id="number_of_complaints"></div>
+                <div class="panel panel-default">
+                  <div class="panel-heading">States with the Higest number of complaints</div>
+                  <div class="panel-body" id="number_of_complaints"></div>
+                </div>
+            </div> <!-- row -->
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Data Table showing ratio of population to Complaints</div>
+                    <div class="panel-body" id="table_div"></div>
+                </div>
             </div>
         </div> <!-- row -->
     </div> <!-- container -->
@@ -165,12 +174,16 @@
     <!-- Google Charts API -->
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
-        google.load('visualization', '1', {packages: ['corechart', 'bar']});
-        google.setOnLoadCallback(drawMultSeries);
+        google.load("visualization", "1.1", {packages:['corechart', 'bar', 'table']});
+        google.setOnLoadCallback(runAll);
+
+      function runAll(){
+        drawMultSeries();
+        drawTable();
+      }
 
 
-
-      function drawMultSeries(jsonData) {
+      function drawMultSeries() {
         $.getJSON( "./api.php?query=2", function(json) {
 
             // create an array of data
@@ -185,7 +198,7 @@
                 tmp = [];
                 for (var j = 0; j < dataArray[0].length; j++) {
                     thiVal = json[i][dataArray[0][j]];
-                    console.log(thiVal);
+                    //console.log(thiVal);
                     if(!isNaN(parseFloat(thiVal)) && isFinite(thiVal)){
                       tmp.push(parseFloat(thiVal)); 
                     }else{
@@ -194,9 +207,6 @@
                 }
                 dataArray.push(tmp);
             }
-
-
-
 
 
               var data = google.visualization.arrayToDataTable(dataArray);
@@ -218,6 +228,51 @@
         });
 
       }
+
+
+
+    function drawTable() {
+        $.getJSON( "./api.php?query=3", function(json) {
+
+                // create an array of data
+                var dataArray = [];
+                var tmp = [];
+                var tmp2 = [];
+                for (x in json[0]) {
+                    tmp.push(x);
+                }
+                tmp2.push(tmp);
+                  
+                for (var i = 0; i < json.length; i++) {
+                    tmp = [];
+                    for (var j = 0; j < tmp2[0].length; j++) {
+                        thiVal = json[i][tmp2[0][j]];
+                        //console.log(thiVal);
+                        if(!isNaN(parseFloat(thiVal)) && isFinite(thiVal)){
+                          tmp.push(parseFloat(thiVal)); 
+                        }else{
+                            tmp.push(thiVal);
+                        }
+                    }
+                    dataArray.push(tmp);
+                }
+
+
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'State');
+                data.addColumn('number', 'Complaints');
+                data.addColumn('number', 'Population');
+                data.addColumn('number', 'Complaint Ratio');
+                data.addRows(dataArray);
+
+                var table = new google.visualization.Table(document.getElementById('table_div'));
+
+                table.draw(data, {showRowNumber: false, width: '100%', height: '100%'});
+                    });
+
+      }
+
+
 
     </script>
   </body>

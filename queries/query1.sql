@@ -1,0 +1,1 @@
+SELECT state, count(*) as 'Number of Complaints' FROM consumer_complaint WHERE state IS NOT NULL AND state <> ' ' GROUP BY state order by count(*) desc LIMIT 10;

@@ -52,6 +52,7 @@
         }
 
 
+
         //Part 1: Create Tables
         $sql = file_get_contents("./ddl/create_geography.sql");
         if (mysqli_query($db, $sql) === TRUE) {
@@ -59,6 +60,14 @@
             $mysqlError = true;
             $mysqlErrorMessage = "Could not create geography table";           
         }
+
+
+        $sql = file_get_contents("./ddl/create_geography_index.sql");
+        if (mysqli_query($db, $sql) === TRUE) {            
+        }else{
+            $mysqlError = true;
+            $mysqlErrorMessage = "Could not create geography table index";       
+        }      
 
 
         $sql = file_get_contents("./ddl/create_acs_estimate.sql");
@@ -237,6 +246,18 @@
         $consumerComplaintTableCheck = false;
     }
 
+
+    //Checking for geo join index
+    $result = $db->query("SHOW INDEXES from cfpb.geography WHERE Key_name LIKE 'geo_join_index';");
+    if($result->num_rows == 0) {
+        $geographyIndexCheck = false;
+    } else {
+        $geographyIndexCheck = true;
+    }
+    $result->close();
+
+
+
     mysql_close($conn);
 
 ?>
@@ -328,7 +349,7 @@
             <div class="col-md-12"><div><h1>Administration</h1></div></div>
         </div>
         <div class="row">
-            <div class="col-md-12"><h3>Configuration Status</h3></div>
+            <div class="col-md-12"><h3>Table Status</h3></div>
         </div>
         <div class="row">
             <div class="col-md-6">
@@ -339,6 +360,7 @@
                             <th>Exists?</th>
                             <th>Loaded?</th>
                             <th>Number of Records</th>
+                            <th>Indexes</th>
                         </tr>                                                                             
                     </thead>
                     <tbody>
@@ -347,24 +369,28 @@
                             <td class="text-center"><span class="label <?php echo ($geographyTableCheck == false? 'label-danger': 'label-success');?>"><?php echo ($geographyTableCheck == false? 'No': 'Yes');?></span></td>
                             <td class="text-center"><span class="label <?php echo ($geographyTableRowCount == 0? 'label-danger': 'label-success');?>"><?php echo ($geographyTableRowCount == 0? 'No': 'Yes');?></span></td>
                             <td><?php echo $geographyTableRowCount;?></td>
+                            <td class="text-center"><span class="label <?php echo ($geographyIndexCheck == false? 'label-danger': 'label-success');?>"><?php echo ($geographyIndexCheck == false? 'No': 'Yes');?></span></td>
                         </tr>
                          <tr>
                             <td>acs_estimates</td>
                             <td class="text-center"><span class="label <?php echo ($acsEstimateTableCheck == false? 'label-danger': 'label-success');?>"><?php echo ($acsEstimateTableCheck == false? 'No': 'Yes');?></span></td>
                             <td class="text-center"><span class="label <?php echo ($acsEstimateTableRowCount == 0? 'label-danger': 'label-success');?>"><?php echo ($acsEstimateTableRowCount == 0? 'No': 'Yes');?></span></td>
                             <td><?php echo $acsEstimateTableRowCount;?></td>
+                            <td class="text-center"><span class="label label-info">N/A</span></td>
                         </tr>   
                          <tr>
                             <td>acs_margin_of_error</td>
                             <td class="text-center"><span class="label <?php echo ($acsMarginOfErrorTableCheck == false? 'label-danger': 'label-success');?>"><?php echo ($acsMarginOfErrorTableCheck == false? 'No': 'Yes');?></span></td>
                             <td class="text-center"><span class="label <?php echo ($acsMarginOfErrorTableRowCount == 0? 'label-danger': 'label-success');?>"><?php echo ($acsMarginOfErrorTableRowCount == 0? 'No': 'Yes');?></span></td>
                             <td><?php echo $acsMarginOfErrorTableRowCount;?></td>
+                            <td class="text-center"><span class="label label-info">N/A</span></td>
                         </tr>    
                          <tr>
                             <td>consumer_complaint</td>
                             <td class="text-center"><span class="label <?php echo ($consumerComplaintTableCheck == false? 'label-danger': 'label-success');?>"><?php echo ($consumerComplaintTableCheck == false? 'No': 'Yes');?></span></td>
                             <td class="text-center"><span class="label <?php echo ($consumerComplaintTableRowCount == 0? 'label-danger': 'label-success');?>"><?php echo ($consumerComplaintTableRowCount == 0? 'No': 'Yes');?></span></td>
                             <td><?php echo $consumerComplaintTableRowCount;?></td>
+                            <td class="text-center"><span class="label label-info">N/A</span></td>
                         </tr>                                                                       
                     </tbody>
                 </table>

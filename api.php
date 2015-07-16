@@ -3,6 +3,9 @@
 * This is a simple API to get data from the database....
 * add queries to the getQuery function and they become accessible 
 * to other parts of the application.
+*
+* Queries are fed from the .sql files in the queries folder
+*
 */
 
     $username = "cfpb";
@@ -20,30 +23,16 @@
 		    while($row = $result->fetch_array(MYSQL_ASSOC)) {
 		            $myArray[] = $row;
 		    }
+		    header('Content-Type: application/json');
 		    echo json_encode($myArray);
 		}
 		$result->close();
 	}
 
 
-function getQuery ($i){
-	$query = "";
-	switch ($i) {
-    case 1:
-        $query = "SELECT zip_code, count(*) as number_of_complaints, company FROM consumer_complaint WHERE zip_code IS NOT NULL AND company IS NOT NULL AND zip_code <> ' ' GROUP BY zip_code, company;;";
-        break;
-    case 2:
-        $query = "SELECT state, count(*) as 'Number of Complaints' FROM consumer_complaint WHERE state IS NOT NULL AND state <> ' ' GROUP BY state order by count(*) desc LIMIT 10;";
-        break;
-    case 3:
-        $query = "select * from cfpb.geography LIMIT 1;";
-        break;
-    }
-	header('Content-Type: application/json');
-    return $query;
-}
-
-
+	function getQuery ($i){
+	    return file_get_contents("./queries/query".$i.".sql");
+	}
 
 ?>
 
