@@ -98,7 +98,7 @@
         if(!$mysqlError){
 
             //PART 2: Query to load geography table
-            $sql = "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES"; 
+            $sql = "LOAD DATA INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES"; 
             mysql_query($sql) or die(mysql_error()); 
 
             //lets check to see if data was loaded, noticed difference between windows/osx/linux
@@ -108,13 +108,13 @@
             $geographyTableRowCount = mysql_fetch_array( $result );
 
             if ($geographyTableRowCount = 0) {
-                $sql = "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
+                $sql = "LOAD DATA INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
                 mysql_query($sql) or die(mysql_error()); 
             }
 
 
             //PART 3: Query to load Estimates table
-            $sql = "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
+            $sql = "LOAD DATA INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
             mysql_query($sql) or die(mysql_error()); 
 
             //lets check to see if data was loaded, noticed difference between windows/osx/linux
@@ -124,7 +124,7 @@
             $acsEstimateTableRowCount = mysql_fetch_array( $result );
 
             if ($acsEstimateTableRowCount = 0) {
-                $sql = "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
+                $sql = "LOAD DATA INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
                 mysql_query($sql) or die(mysql_error()); 
             }
 
@@ -132,7 +132,7 @@
 
 
             //PART 3: Query to load Margin of Error
-            $sql = "LOAD DATA LOCAL INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
+            $sql = "LOAD DATA INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
             mysql_query($sql) or die(mysql_error()); 
 
             //lets check to see if data was loaded, noticed difference between windows/osx/linux
@@ -142,14 +142,14 @@
             $acsEstimateTableRowCount = mysql_fetch_array( $result );
 
             if ($acsEstimateTableRowCount = 0) {
-                $sql = "LOAD DATA LOCAL INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
+                $sql = "LOAD DATA INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
                 mysql_query($sql) or die(mysql_error()); 
             }
 
 
 
             //PART 5: Query to load consumer complaints table
-            $sql = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
+            $sql = "LOAD DATA INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
             mysql_query($sql) or die(mysql_error()); 
 
             //lets check to see if data was loaded, noticed difference between windows/osx/linux
@@ -159,7 +159,7 @@
             $geographyTableRowCount = mysql_fetch_array( $result );
 
             if ($geographyTableRowCount = 0) {
-                $sql = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
+                $sql = "LOAD DATA INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
                 mysql_query($sql) or die(mysql_error()); 
             }
 
