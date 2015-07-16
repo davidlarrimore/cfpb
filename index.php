@@ -1,12 +1,10 @@
+
 <?php
     $mysqlError = false;
     $username = "cfpb";
     $password = "cfpb";
     $hostname = "localhost";
     $database = "cfpb";
-
-    $conn = mysql_connect($hostname, $username, $password) or die("Connecting to MySQL failed");
-    mysql_select_db($database, $conn) or die("Selecting MySQL database failed");
 
     $db = new mysqli($hostname, $username, $password, $database);
 
@@ -17,227 +15,26 @@
         exit();
     }
 
-    $geographyDataFile = "./data/g20135us-baked.csv";
-    $acsEstimateDataFile = "./data/e20135us0015000-baked.csv";
-    $acsMarginOfErrorDataFile = "./data/m20135us0015000-baked.csv";
-    $consumerComplaintDataFile = "./data/Consumer_Complaints.csv";
+    $DBConfig = true;
+
+    //Code added to check to see if site is setup
+    $result = $db->query("SHOW TABLES LIKE 'geography';");
+    if($result->num_rows == 0) $DBConfig = false;
+    $result->close();
+
+    $result = $db->query("SHOW TABLES LIKE 'acs_estimate';");
+    if($result->num_rows == 0) $DBConfig = false;
+    $result->close();
+
+    $result = $db->query("SHOW TABLES LIKE 'acs_margin_of_error';");
+    if($result->num_rows == 0) $DBConfig = false;
+    $result->close();
 
 
-    //If Posted, we load
-    if ( !empty($_POST) && !$mysqlError) {
+    $result = $db->query("SHOW TABLES LIKE 'consumer_complaint';");
+    if($result->num_rows == 0) $DBConfig = false;
+    $result->close();
 
-        //Part 0: drop tables
-        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.geography;") === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not drop geography table";           
-        }
-
-        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.acs_estimate;") === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not drop acs_estimate table";           
-        }
-
-        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.acs_margin_of_error;") === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not drop acs_margin_of_error table";           
-        }
-
-        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.consumer_complaint;") === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not drop consumer_complaint table";           
-        }
-
-
-        //Part 1: Create Tables
-        $sql = file_get_contents("./ddl/create_geography.sql");
-        if (mysqli_query($db, $sql) === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not create geography table";           
-        }
-
-
-        $sql = file_get_contents("./ddl/create_acs_estimate.sql");
-        if (mysqli_query($db, $sql) === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not create acs_estimate table";           
-        }
-
-
-        $sql = file_get_contents("./ddl/create_acs_margin_of_error.sql");
-        if (mysqli_query($db, $sql) === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not create acs_margin_of_error table";           
-        }       
-
-
-        $sql = file_get_contents("./ddl/create_consumer_complaint.sql");
-        if (mysqli_query($db, $sql) === TRUE) {
-        }else{
-            $mysqlError = true;
-            $mysqlErrorMessage = "Could not create consumer_complaint table";           
-        }  
-
-
-
-        if(!$mysqlError){
-
-            //PART 2: Query to load geography table
-            $sql = "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES"; 
-            mysql_query($sql) or die(mysql_error()); 
-
-            //lets check to see if data was loaded, noticed difference between windows/osx/linux
-            $sql = "SELECT count(*) as `count` FROM cfpb.geography"; 
-            $result = mysql_query($sql, $conn); 
-
-            $geographyTableRowCount = mysql_fetch_array( $result );
-
-            if ($geographyTableRowCount = 0) {
-                $sql = "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
-                mysql_query($sql) or die(mysql_error()); 
-            }
-
-
-            //PART 3: Query to load Estimates table
-            $sql = "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
-            mysql_query($sql) or die(mysql_error()); 
-
-            //lets check to see if data was loaded, noticed difference between windows/osx/linux
-            $sql = "SELECT count(*) as `count` FROM cfpb.acs_estimate"; 
-            $result = mysql_query($sql, $conn); 
-
-            $acsEstimateTableRowCount = mysql_fetch_array( $result );
-
-            if ($acsEstimateTableRowCount = 0) {
-                $sql = "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
-                mysql_query($sql) or die(mysql_error()); 
-            }
-
-
-
-
-            //PART 3: Query to load Margin of Error
-            $sql = "LOAD DATA LOCAL INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
-            mysql_query($sql) or die(mysql_error()); 
-
-            //lets check to see if data was loaded, noticed difference between windows/osx/linux
-            $sql = "SELECT count(*) as `count` FROM cfpb.acs_estimate"; 
-            $result = mysql_query($sql, $conn); 
-
-            $acsEstimateTableRowCount = mysql_fetch_array( $result );
-
-            if ($acsEstimateTableRowCount = 0) {
-                $sql = "LOAD DATA LOCAL INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
-                mysql_query($sql) or die(mysql_error()); 
-            }
-
-
-
-            //PART 5: Query to load consumer complaints table
-            $sql = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
-            mysql_query($sql) or die(mysql_error()); 
-
-            //lets check to see if data was loaded, noticed difference between windows/osx/linux
-            $sql = "SELECT count(*) as `count` FROM cfpb.consumer_complaint"; 
-            $result = mysql_query($sql, $conn); 
-
-            $geographyTableRowCount = mysql_fetch_array( $result );
-
-            if ($geographyTableRowCount = 0) {
-                $sql = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
-                mysql_query($sql) or die(mysql_error()); 
-            }
-
-            
-        }
-
-
-    }
-
-
-    /*
-    * GETTING STATISTICS
-    *
-    * This process includes checking each table to see if the table exists. If so, it gets statistices
-    */
-
-
-    //GEOGRAPHY TABLE
-    $val = mysql_query('select 1 from cfpb.geography LIMIT 1');
-    if($val !== FALSE)
-    {
-        //GETTING STATISTICS
-        //Get Geography Table Row Count
-        $sql = "SELECT count(*) as `count` FROM cfpb.geography"; 
-        $result = mysql_query($sql, $conn); 
-        $geographyTableRowCount = mysql_fetch_array($result)['count'];
-        $geographyTableCheck = true;
-    }
-    else
-    {
-        $geographyTableRowCount = 0;
-        $geographyTableCheck = false;
-    }
-
-
-    //ACS_ESTIMATE TABLE
-    $val = mysql_query('select 1 from cfpb.acs_estimate LIMIT 1');
-    if($val !== FALSE)
-    {
-        //GETTING STATISTICS
-        //Get Geography Table Row Count
-        $sql = "SELECT count(*) as `count` FROM cfpb.acs_estimate"; 
-        $result = mysql_query($sql, $conn); 
-        $acsEstimateTableRowCount = mysql_fetch_array($result)['count'];
-        $acsEstimateTableCheck = true;
-    }
-    else
-    {
-        $acsEstimateTableRowCount = 0;
-        $acsEstimateTableCheck = false;
-    }
-
-    //ACS_MARGIN_OF_ERROR TABLE
-    $val = mysql_query('select 1 from cfpb.acs_margin_of_error LIMIT 1');
-    if($val !== FALSE)
-    {
-        //GETTING STATISTICS
-        //Get Geography Table Row Count
-        $sql = "SELECT count(*) as `count` FROM cfpb.acs_margin_of_error"; 
-        $result = mysql_query($sql, $conn); 
-        $acsMarginOfErrorTableRowCount = mysql_fetch_array($result)['count'];
-        $acsMarginOfErrorTableCheck = true;
-    }
-    else
-    {
-        $acsMarginOfErrorTableRowCount = 0;
-        $acsMarginOfErrorTableCheck = false;
-    }
-
-    //CONSUMER_COMPLAINTS TABLE
-    $val = mysql_query('select 1 from cfpb.consumer_complaint LIMIT 1');
-    if($val !== FALSE)
-    {
-        //GETTING STATISTICS
-        //Get Geography Table Row Count
-        $sql = "SELECT count(*) as `count` FROM cfpb.consumer_complaint"; 
-        $result = mysql_query($sql, $conn); 
-        $consumerComplaintTableRowCount = mysql_fetch_array($result)['count'];
-        $consumerComplaintTableCheck = true;
-    }
-    else
-    {
-        $consumerComplaintTableRowCount = 0;
-        $consumerComplaintTableCheck = false;
-    }
-
-    mysql_close($conn);
 
 ?>
 
@@ -278,7 +75,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">David Larrimore Demo Site</a>
+          <a class="navbar-brand" href="./">David Larrimore Demo Site</a>
         </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse navbar-left" id="bs-example-navbar-collapse-1">
@@ -291,7 +88,7 @@
          <div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
             <li><a href="./">Dashboard</a></li>
-            <li class="active"><a href="./">Administration <span class="sr-only">(current)</span></a></li>
+            <li class="active"><a href="./admin.php">Administration <span class="sr-only">(current)</span></a></li>
           </ul>         
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
@@ -324,56 +121,32 @@
             </div>
         <?php } ?>
 
-        <div class="row">
-            <div class="col-md-12"><div><h1>Administration</h1></div></div>
-        </div>
-        <div class="row">
-            <div class="col-md-12"><h3>Configuration Status</h3></div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Table Name</th>
-                            <th>Exists?</th>
-                            <th>Loaded?</th>
-                            <th>Number of Records</th>
-                        </tr>                                                                             
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>geographies</td>
-                            <td class="text-center"><span class="label <?php echo ($geographyTableCheck == false? 'label-danger': 'label-success');?>"><?php echo ($geographyTableCheck == false? 'No': 'Yes');?></span></td>
-                            <td class="text-center"><span class="label <?php echo ($geographyTableRowCount == 0? 'label-danger': 'label-success');?>"><?php echo ($geographyTableRowCount == 0? 'No': 'Yes');?></span></td>
-                            <td><?php echo $geographyTableRowCount;?></td>
-                        </tr>
-                         <tr>
-                            <td>acs_estimates</td>
-                            <td class="text-center"><span class="label <?php echo ($acsEstimateTableCheck == false? 'label-danger': 'label-success');?>"><?php echo ($acsEstimateTableCheck == false? 'No': 'Yes');?></span></td>
-                            <td class="text-center"><span class="label <?php echo ($acsEstimateTableRowCount == 0? 'label-danger': 'label-success');?>"><?php echo ($acsEstimateTableRowCount == 0? 'No': 'Yes');?></span></td>
-                            <td><?php echo $acsEstimateTableRowCount;?></td>
-                        </tr>   
-                         <tr>
-                            <td>acs_margin_of_error</td>
-                            <td class="text-center"><span class="label <?php echo ($acsMarginOfErrorTableCheck == false? 'label-danger': 'label-success');?>"><?php echo ($acsMarginOfErrorTableCheck == false? 'No': 'Yes');?></span></td>
-                            <td class="text-center"><span class="label <?php echo ($acsMarginOfErrorTableRowCount == 0? 'label-danger': 'label-success');?>"><?php echo ($acsMarginOfErrorTableRowCount == 0? 'No': 'Yes');?></span></td>
-                            <td><?php echo $acsMarginOfErrorTableRowCount;?></td>
-                        </tr>    
-                         <tr>
-                            <td>consumer_complaint</td>
-                            <td class="text-center"><span class="label <?php echo ($consumerComplaintTableCheck == false? 'label-danger': 'label-success');?>"><?php echo ($consumerComplaintTableCheck == false? 'No': 'Yes');?></span></td>
-                            <td class="text-center"><span class="label <?php echo ($consumerComplaintTableRowCount == 0? 'label-danger': 'label-success');?>"><?php echo ($consumerComplaintTableRowCount == 0? 'No': 'Yes');?></span></td>
-                            <td><?php echo $consumerComplaintTableRowCount;?></td>
-                        </tr>                                                                       
-                    </tbody>
-                </table>
+
+        <?php if(!$DBConfig){ ?>
+                <div class="row">&nbsp;</div>
+                <div class="row">
+                <div class="col-md-12">
+                    <div class="alert alert-danger " role="alert">
+                        Database is not configured, please go to <a href="./admin.php">Admin Page</a>.
+                    </div>
+                </div>
             </div>
+        <?php } ?>
+
+        <div class="row">&nbsp;</div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="jumbotron text-center">
+                  <h1>CFPB Complaint Dashboard</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
             <div class="col-md-6">
-                <form method="post">
-                    <button type="sumbit" style="font-size:200%;" class="btn btn-md btn-block btn-primary">Load Tables and Data</a>
-                    <input type="hidden" name="load" id="load" value="load"/>
-                </button>
+            <div class="panel panel-default">
+              <div class="panel-heading">States with the Higest number of complaints</div>
+              <div class="panel-body" id="number_of_complaints"></div>
             </div>
         </div> <!-- row -->
     </div> <!-- container -->
@@ -384,9 +157,68 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
     <!-- Chart.js -->
-    <script src="{% static "dashboard/js/Chart.min.js" %}"></script>
+    <script src="./js/Chart.min.js"></script>
 
     <!-- D3.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8"></script>
+
+    <!-- Google Charts API -->
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        google.load('visualization', '1', {packages: ['corechart', 'bar']});
+        google.setOnLoadCallback(drawMultSeries);
+
+
+
+      function drawMultSeries(jsonData) {
+        $.getJSON( "./api.php?query=2", function(json) {
+
+            // create an array of data
+            var dataArray = [];
+            var tmp = [];
+            for (x in json[0]) {
+                tmp.push(x);
+            }
+            dataArray.push(tmp);
+              
+            for (var i = 0; i < json.length; i++) {
+                tmp = [];
+                for (var j = 0; j < dataArray[0].length; j++) {
+                    thiVal = json[i][dataArray[0][j]];
+                    console.log(thiVal);
+                    if(!isNaN(parseFloat(thiVal)) && isFinite(thiVal)){
+                      tmp.push(parseFloat(thiVal)); 
+                    }else{
+                        tmp.push(thiVal);
+                    }
+                }
+                dataArray.push(tmp);
+            }
+
+
+
+
+
+              var data = google.visualization.arrayToDataTable(dataArray);
+
+              var options = {
+                title: 'States with the largest number of complaints',
+                chartArea: {},
+                hAxis: {
+                  title: 'Total Complaints',
+                  minValue: 0
+                },
+                bars: 'horizontal',
+                vAxis: {
+                  title: 'State'
+                }
+              };
+              var material = new google.charts.Bar(document.getElementById('number_of_complaints'));
+              material.draw(data, options);
+        });
+
+      }
+
+    </script>
   </body>
 </html>
