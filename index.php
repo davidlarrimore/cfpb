@@ -36,6 +36,11 @@
     $result->close();
 
 
+    $result = $db->query("SHOW TABLES LIKE 'consumer_acs_usa_ratio';");
+    if($result->num_rows == 0) $DBConfig = false;
+    $result->close();
+
+
 ?>
 
 <!DOCTYPE html>

@@ -42,7 +42,7 @@ This was developed using the LAMPP Stack [XAMPP version 5.5.24](https://www.apac
 
 	set memory_limit=512M
 
-* My.cnf needs to be modified to support the queries.
+* My.cnf needs to be modified to support the larger queries.
 
 	sudo vi /etc/mysql/my.cnf
 
@@ -57,6 +57,22 @@ This was developed using the LAMPP Stack [XAMPP version 5.5.24](https://www.apac
 * I have also found a lot of value in increasing the buffer pool size for mysql
 
 	SET GLOBAL innodb_buffer_pool_size=402653184;
+
+
+###Database Optimization
+
+Depending upon the server size, it may be necessary to optimize the settings to get the bigger queries running. Please follow these steps if necessary. Each of these steps are run using the mysql cli, and require a reboot once performed.
+
+
+* increase tmp_table_size: @@tmp_table_size=134217728;
+
+	set @@tmp_table_size=134217728;
+
+* increase max_heap_table_size
+
+	set @@max_heap_table_size=536870912;
+
+
 
 
 ### Connect to MYSQL server

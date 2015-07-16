@@ -51,6 +51,11 @@
             $mysqlErrorMessage = "Could not drop consumer_complaint table";           
         }
 
+        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.consumer_acs_usa_ratio;") === TRUE) {
+        }else{
+            $mysqlError = true;
+            $mysqlErrorMessage = "Could not drop consumer_acs_usa_ratio table";           
+        }
 
 
         //Part 1: Create Tables
@@ -95,12 +100,23 @@
 
 
 
-        $sql = file_get_contents("./ddl/consumer_complaint_index.sql");
+        $sql = file_get_contents("./ddl/create_consumer_complaint_index.sql");
         if (mysqli_query($db, $sql) === TRUE) {            
         }else{
             $mysqlError = true;
             $mysqlErrorMessage = "Could not create consumer_complaint table index";       
         }    
+
+
+
+        $sql = file_get_contents("./ddl/create_consumer_acs_usa_ratio.sql");
+        if (mysqli_query($db, $sql) === TRUE) {
+        }else{
+            $mysqlError = true;
+            $mysqlErrorMessage = "Could not create consumer_acs_usa_ratio table";           
+        }  
+
+
 
 
         if(!$mysqlError){
@@ -139,7 +155,7 @@
 
 
 
-            //PART 3: Query to load Margin of Error
+            //PART 4: Query to load Margin of Error
             $sql = "LOAD DATA LOCAL INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
             mysql_query($sql) or die(mysql_error()); 
 
@@ -164,14 +180,17 @@
             $sql = "SELECT count(*) as `count` FROM cfpb.consumer_complaint"; 
             $result = mysql_query($sql, $conn); 
 
-            $geographyTableRowCount = mysql_fetch_array( $result );
+            $consumerComplaintTableRowCount = mysql_fetch_array( $result );
 
-            if ($geographyTableRowCount = 0) {
+            if ($consumerComplaintTableRowCount = 0) {
                 $sql = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
                 mysql_query($sql) or die(mysql_error()); 
             }
 
             
+            //PART 6: Aggregated Tables
+            $sql = file_get_contents("./queries/load_consumer_acs_usa_ratio.sql"); 
+            mysql_query($sql) or die(mysql_error()); 
         }
 
 
@@ -272,6 +291,23 @@
     }
     //$result->close();
 
+
+    //AGGREGATED TABLE TABLE
+    $val = mysql_query('select 1 from cfpb.consumer_acs_usa_ratio LIMIT 1');
+    if($val !== FALSE)
+    {
+        //GETTING STATISTICS
+        //Get Geography Table Row Count
+        $sql = "SELECT count(*) as `count` FROM cfpb.consumer_acs_usa_ratio"; 
+        $result = mysql_query($sql, $conn); 
+        $consumerACSUSARatioTableRowCount = mysql_fetch_array($result)['count'];
+        $consumerACSUSARatioTableCheck = true;
+    }
+    else
+    {
+        $consumerACSUSARatioTableRowCount = 0;
+        $consumerACSUSARatioTableCheck = false;
+    }
 
 
     mysql_close($conn);
@@ -418,7 +454,14 @@
                             <td class="text-center"><span class="label <?php echo ($consumerComplaintTableRowCount == 0? 'label-danger': 'label-success');?>"><?php echo ($consumerComplaintTableRowCount == 0? 'No': 'Yes');?></span></td>
                             <td><?php echo $consumerComplaintTableRowCount;?></td>
                             <td class="text-center"><span class="label <?php echo ($consumerComplaintIndexCheck == false? 'label-danger': 'label-success');?>"><?php echo ($consumerComplaintIndexCheck == false? 'No': 'Yes');?></span></td>
-                        </tr>                                                                       
+                        </tr>       
+                         <tr>
+                            <td>consumer_acs_usa_ratio</td>
+                            <td class="text-center"><span class="label <?php echo ($consumerACSUSARatioTableCheck == false? 'label-danger': 'label-success');?>"><?php echo ($consumerACSUSARatioTableCheck == false? 'No': 'Yes');?></span></td>
+                            <td class="text-center"><span class="label <?php echo ($consumerACSUSARatioTableRowCount == 0? 'label-danger': 'label-success');?>"><?php echo ($consumerACSUSARatioTableRowCount == 0? 'No': 'Yes');?></span></td>
+                            <td><?php echo $consumerACSUSARatioTableRowCount;?></td>
+                            <td class="text-center"><span class="label label-info">N/A</span></td>
+                        </tr>                                                                                          
                     </tbody>
                 </table>
             </div>
