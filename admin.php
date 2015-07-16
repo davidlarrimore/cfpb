@@ -95,6 +95,14 @@
 
 
 
+        $sql = file_get_contents("./ddl/consumer_complaint_index.sql");
+        if (mysqli_query($db, $sql) === TRUE) {            
+        }else{
+            $mysqlError = true;
+            $mysqlErrorMessage = "Could not create consumer_complaint table index";       
+        }    
+
+
         if(!$mysqlError){
 
             //PART 2: Query to load geography table
@@ -254,6 +262,14 @@
     } else {
         $geographyIndexCheck = true;
     }
+
+
+    $result = $db->query("SHOW INDEXES from cfpb.consumer_complaint WHERE Key_name LIKE 'cc_join_index';");
+    if($result->num_rows == 0) {
+        $consumerComplaintIndexCheck = false;
+    } else {
+        $consumerComplaintIndexCheck = true;
+    }
     //$result->close();
 
 
@@ -390,7 +406,7 @@
                             <td class="text-center"><span class="label <?php echo ($consumerComplaintTableCheck == false? 'label-danger': 'label-success');?>"><?php echo ($consumerComplaintTableCheck == false? 'No': 'Yes');?></span></td>
                             <td class="text-center"><span class="label <?php echo ($consumerComplaintTableRowCount == 0? 'label-danger': 'label-success');?>"><?php echo ($consumerComplaintTableRowCount == 0? 'No': 'Yes');?></span></td>
                             <td><?php echo $consumerComplaintTableRowCount;?></td>
-                            <td class="text-center"><span class="label label-info">N/A</span></td>
+                            <td class="text-center"><span class="label <?php echo ($consumerComplaintIndexCheck == false? 'label-danger': 'label-success');?>"><?php echo ($consumerComplaintIndexCheck == false? 'No': 'Yes');?></span></td>
                         </tr>                                                                       
                     </tbody>
                 </table>
