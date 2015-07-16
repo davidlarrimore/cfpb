@@ -25,7 +25,7 @@ This was developed using the LAMPP Stack [XAMPP version 5.5.24](https://www.apac
 
 * [Use this link](http://howtoubuntu.org/how-to-install-lamp-on-ubuntu) to get the base install.
 * install git
-* Navigate to /var/www/
+* Navigate to /var/www/html/
 * Clone the repository
 
 	sudo git clone https://github.com/davidlarrimore/cfpb.git
@@ -33,7 +33,7 @@ This was developed using the LAMPP Stack [XAMPP version 5.5.24](https://www.apac
 *PHP.ini needs to be modified to support the amount of data that will be flowing through it. 512 should be enough for most operations.
 
 	sudo vi /etc/php5/apache2/php.ini
-	
+
 	memory_limit=512M
 
 
@@ -57,6 +57,11 @@ Login to the mysql database and run the following commands to create the cfpb us
 	GRANT ALL PRIVILEGES ON `cfpb`.* TO 'cfpb'@'localhost';
 	GRANT ALL PRIVILEGES ON `cfpb\_%`.* TO 'cfpb'@'localhost';
 
+
+
+#### Accessing the Application
+
+Depending upon your configuration, you should be able to access the application at http://<hostname>/cfpb/
 
 
 #### Load Data into Database

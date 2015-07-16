@@ -254,7 +254,7 @@
     } else {
         $geographyIndexCheck = true;
     }
-    $result->close();
+    //$result->close();
 
 
 
