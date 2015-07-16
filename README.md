@@ -2,6 +2,9 @@
 
 
 
+**NOTE: This application works best in a modern web browser (aka > IE 9.0)**
+
+
 ##Installation and Setup
 
 This project crosses several IT domains from Infrastructure, Web Development, Database Management, Analytics, etc. and therefore has several logical components that make it work.

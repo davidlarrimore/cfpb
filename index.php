@@ -148,8 +148,14 @@
                   <div class="panel-heading">States with the Higest number of complaints</div>
                   <div class="panel-body" id="number_of_complaints"></div>
                 </div>
-            </div> <!-- row -->
-        </div>
+            </div> 
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                  <div class="panel-heading">Complaints over Time</div>
+                  <div class="panel-body" id="chart_div"></div>
+                </div>
+            </div>
+        </div><!-- row -->
         <div class="row">
             <div class="col-md-12">
                 <div class="panel panel-default">
@@ -174,17 +180,18 @@
     <!-- Google Charts API -->
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
-        google.load("visualization", "1.1", {packages:['corechart', 'bar', 'table']});
+        google.load("visualization", "1.1", {packages:['corechart', 'bar', 'table', 'line']});
         google.setOnLoadCallback(runAll);
 
       function runAll(){
         drawMultSeries();
+        drawBasic();
         drawTable();
       }
 
 
       function drawMultSeries() {
-        $.getJSON( "./api.php?query=2", function(json) {
+        $.getJSON( "./api.php?query=1", function(json) {
 
             // create an array of data
             var dataArray = [];
@@ -271,6 +278,51 @@
                     });
 
       }
+
+
+
+
+
+    function drawBasic() {
+        $.getJSON( "./api.php?query=2", function(json) {
+
+             // create an array of data
+            var dataArray = [];
+            var tmp = [];
+            for (x in json[0]) {
+                tmp.push(x);
+            }
+            dataArray.push(tmp);
+              
+            for (var i = 0; i < json.length; i++) {
+                tmp = [];
+                for (var j = 0; j < dataArray[0].length; j++) {
+                    thiVal = json[i][dataArray[0][j]];
+                    //console.log(thiVal);
+                    if(!isNaN(parseFloat(thiVal)) && isFinite(thiVal)){
+                      tmp.push(parseFloat(thiVal)); 
+                    }else{
+                        tmp.push(thiVal);
+                    }
+                }
+                dataArray.push(tmp);
+            }
+
+
+                  var data = google.visualization.arrayToDataTable(dataArray);
+
+                  var options = {
+                  curveType: 'function',
+                  legend: { position: 'bottom' }
+                };
+
+                    var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                  chart.draw(data, options);
+          });
+    }
+
+
+
 
 
 

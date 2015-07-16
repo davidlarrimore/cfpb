@@ -1,1 +1,6 @@
-SELECT state, count(*) as 'Number of Complaints' FROM consumer_complaint WHERE state IS NOT NULL AND state <> ' ' GROUP BY state order by count(*) desc LIMIT 10;
+SELECT substr(date_received, 6-10) date_received,
+       count(*) as 'number of complaints'
+  FROM consumer_complaint
+  WHERE date_received is not null
+ GROUP 
+    BY substr(date_received, 6-10);
