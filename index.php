@@ -115,7 +115,7 @@
             $acsEstimateTableRowCount = mysql_fetch_array( $result );
 
             if ($acsEstimateTableRowCount = 0) {
-                $sql = "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
+                $sql = "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES (FILEID,FILETYPE,STUSAB,CHARITER,SEQUENCE,LOGRECNO,GEOID,Geography Name,B06010_001,B06010_002,B06010_003,B06010_004,B06010_005,B06010_006,B06010_007,B06010_008,B06010_009,B06010_010,B06010_011,B06010_012,B06010_013,B06010_014,B06010_015,B06010_016,B06010_017,B06010_018,B06010_019,B06010_020,B06010_021,B06010_022,B06010_023,B06010_024,B06010_025,B06010_026,B06010_027,B06010_028,B06010_029,B06010_030,B06010_031,B06010_032,B06010_033,B06010_034,B06010_035,B06010_036,B06010_037,B06010_038,B06010_039,B06010_040,B06010_041,B06010_042,B06010_043,B06010_044,B06010_045,B06010_046,B06010_047,B06010_048,B06010_049,B06010_050,B06010_051,B06010_052,B06010_053,B06010_054,B06010_055,B06010PR_001,B06010PR_002,B06010PR_003,B06010PR_004,B06010PR_005,B06010PR_006,B06010PR_007,B06010PR_008,B06010PR_009,B06010PR_010,B06010PR_011,B06010PR_012,B06010PR_013,B06010PR_014,B06010PR_015,B06010PR_016,B06010PR_017,B06010PR_018,B06010PR_019,B06010PR_020,B06010PR_021,B06010PR_022,B06010PR_023,B06010PR_024,B06010PR_025,B06010PR_026,B06010PR_027,B06010PR_028,B06010PR_029,B06010PR_030,B06010PR_031,B06010PR_032,B06010PR_033,B06010PR_034,B06010PR_035,B06010PR_036,B06010PR_037,B06010PR_038,B06010PR_039,B06010PR_040,B06010PR_041,B06010PR_042,B06010PR_043,B06010PR_044,B06010PR_045,B06010PR_046,B06010PR_047,B06010PR_048,B06010PR_049,B06010PR_050,B06010PR_051,B06010PR_052,B06010PR_053,B06010PR_054,B06010PR_055,B06011_001,B06011_002,B06011_003,B06011_004,B06011_005,B06011PR_001,B06011PR_002,B06011PR_003,B06011PR_004,B06011PR_005,B06012_001,B06012_002,B06012_003,B06012_004,B06012_005,B06012_006,B06012_007,B06012_008,B06012_009,B06012_010,B06012_011,B06012_012,B06012_013,B06012_014,B06012_015,B06012_016,B06012_017,B06012_018,B06012_019,B06012_020,B06012PR_001,B06012PR_002,B06012PR_003,B06012PR_004,B06012PR_005,B06012PR_006,B06012PR_007,B06012PR_008,B06012PR_009,B06012PR_010,B06012PR_011,B06012PR_012,B06012PR_013,B06012PR_014,B06012PR_015,B06012PR_016,B06012PR_017,B06012PR_018,B06012PR_019,B06012PR_020)"; 
                 mysql_query($sql) or die(mysql_error()); 
             }
 
@@ -123,7 +123,7 @@
 
 
             //PART 4: Query to load consumer complaints table
-            $sql = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES"; 
+            $sql = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
             mysql_query($sql) or die(mysql_error()); 
 
             //lets check to see if data was loaded, noticed difference between windows/osx/linux
@@ -316,15 +316,15 @@
         <div class="row">
             <div class="col-md-6">
                 <table class="table table-bordered">
-                    <head>
+                    <thead>
                         <tr>
-                            <td>Table Name</td>
-                            <td>Exists?</td>
-                            <td>Loaded?</td>
-                            <td>Number of Records</td>
+                            <th>Table Name</th>
+                            <th>Exists?</th>
+                            <th>Loaded?</th>
+                            <th>Number of Records</th>
                         </tr>                                                                             
-                    </head>
-                    <body>
+                    </thead>
+                    <tbody>
                         <tr>
                             <td>geographies</td>
                             <td class="text-center"><span class="label <?php echo ($geographyTableCheck == false? 'label-danger': 'label-success');?>"><?php echo ($geographyTableCheck == false? 'No': 'Yes');?></span></td>
@@ -349,7 +349,7 @@
                             <td class="text-center"><span class="label <?php echo ($consumerComplaintTableRowCount == 0? 'label-danger': 'label-success');?>"><?php echo ($consumerComplaintTableRowCount == 0? 'No': 'Yes');?></span></td>
                             <td><?php echo $consumerComplaintTableRowCount;?></td>
                         </tr>                                                                       
-                    </body>
+                    </tbody>
                 </table>
             </div>
             <div class="col-md-6">
