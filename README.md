@@ -51,13 +51,28 @@ Follow instructions on [http://www2.census.gov/acs2013_5yr/summaryfile/ACS_2013_
 
 ### Database Setup
 
+
+#### XAMPP Access on OSX
+
+If using OSX to locally connect to MySQL database, use the following command to envoke xampp
+
+	/Applications/XAMPP/xamppfiles/bin/mysql -u root
+
+
 #### Accounts and Databases
 
-	CREATE USER 'cfpb'@'localhost' IDENTIFIED BY '<password>';
-	GRANT USAGE ON *.* TO 'cfpb'@'localhost' IDENTIFIED BY '<password>' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
+	CREATE USER 'cfpb'@'localhost' IDENTIFIED BY 'cfpb';
+	GRANT USAGE ON *.* TO 'cfpb'@'localhost' IDENTIFIED BY 'cfpb' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
 	CREATE DATABASE IF NOT EXISTS `cfpb`;
 	GRANT ALL PRIVILEGES ON `cfpb`.* TO 'cfpb'@'localhost';
 	GRANT ALL PRIVILEGES ON `cfpb\_%`.* TO 'cfpb'@'localhost';
+
+
+
+
+
+
+
 
 
 ### Required Tools
