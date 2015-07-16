@@ -1,19 +1,21 @@
 <?php
-
+    $mysqlError = false;
     $username = "cfpb";
     $password = "cfpb";
     $hostname = "localhost";
     $database = "cfpb";
 
-    $conn = mysql_connect($hostname, $username, $password)
+    $conn = mysql_connect($hostname, $username, $password) or die("Connecting to MySQL failed");
+    mysql_select_db($database, $conn) or die("Selecting MySQL database failed");
 
-    or die("Connecting to MySQL failed");
+    $db = new mysqli($hostname, $username, $password, $database);
 
-    mysql_select_db($database, $conn)
-
-    or die("Selecting MySQL database failed");
-
-
+    /* check connection */
+    if ($db->connect_errno) {
+        $mysqlError = true;
+        $mysqlErrorMessage = $db->connect_error;
+        exit();
+    }
 
     $geographyDataFile = "./data/g20135us-baked.csv";
     $acsEstimateDataFile = "./data/e20135us0015000-baked.csv";
@@ -22,57 +24,121 @@
 
 
     //If Posted, we load
-    if ( !empty($_POST) ) {
-        //PART 1: Query to load geography table
-        $sql = "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES"; 
-        mysql_query($sql) or die(mysql_error()); 
+    if ( !empty($_POST) && !$mysqlError) {
 
-        //lets check to see if data was loaded, noticed difference between windows/osx/linux
-        $sql = "SELECT count(*) as `count` FROM cfpb.geography"; 
-        $result = mysql_query($sql, $conn); 
+        //Part 0: drop tables
+        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.geography;") === TRUE) {
+        }else{
+            $mysqlError = true;
+            $mysqlErrorMessage = "Could not drop geography table";           
+        }
 
-        $geographyTableRowCount = mysql_fetch_array( $result );
+        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.acs_estimate;") === TRUE) {
+        }else{
+            $mysqlError = true;
+            $mysqlErrorMessage = "Could not drop acs_estimate table";           
+        }
 
-        if ($geographyTableRowCount = 0) {
-            $sql = "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
-            mysql_query($sql) or die(mysql_error()); 
+        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.acs_margin_of_error;") === TRUE) {
+        }else{
+            $mysqlError = true;
+            $mysqlErrorMessage = "Could not drop acs_margin_of_error table";           
+        }
+
+        if (mysqli_query($db, "DROP TABLE IF EXISTS cfpb.consumer_complaint;") === TRUE) {
+        }else{
+            $mysqlError = true;
+            $mysqlErrorMessage = "Could not drop consumer_complaint table";           
         }
 
 
-        //PART 2: Query to load Estimates table
-        $sql = "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES"; 
-        mysql_query($sql) or die(mysql_error()); 
-
-        //lets check to see if data was loaded, noticed difference between windows/osx/linux
-        $sql = "SELECT count(*) as `count` FROM cfpb.acs_estimate"; 
-        $result = mysql_query($sql, $conn); 
-
-        $acsEstimateTableRowCount = mysql_fetch_array( $result );
-
-        if ($acsEstimateTableRowCount = 0) {
-            $sql = "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
-            mysql_query($sql) or die(mysql_error()); 
+        //Part 1: Create Tables
+        $sql = file_get_contents("./ddl/create_geography.sql");
+        if (mysqli_query($db, $sql) === TRUE) {
+        }else{
+            $mysqlError = true;
+            $mysqlErrorMessage = "Could not create geography table";           
         }
 
 
-
-
-        //PART 4: Query to load consumer complaints table
-        $sql = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES"; 
-        mysql_query($sql) or die(mysql_error()); 
-
-        //lets check to see if data was loaded, noticed difference between windows/osx/linux
-        $sql = "SELECT count(*) as `count` FROM cfpb.consumer_complaint"; 
-        $result = mysql_query($sql, $conn); 
-
-        $geographyTableRowCount = mysql_fetch_array( $result );
-
-        if ($geographyTableRowCount = 0) {
-            $sql = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
-            mysql_query($sql) or die(mysql_error()); 
+        $sql = file_get_contents("./ddl/create_acs_estimate.sql");
+        if (mysqli_query($db, $sql) === TRUE) {
+        }else{
+            $mysqlError = true;
+            $mysqlErrorMessage = "Could not create acs_estimate table";           
         }
 
 
+        $sql = file_get_contents("./ddl/create_acs_margin_of_error.sql");
+        if (mysqli_query($db, $sql) === TRUE) {
+        }else{
+            $mysqlError = true;
+            $mysqlErrorMessage = "Could not create acs_margin_of_error table";           
+        }       
+
+
+        $sql = file_get_contents("./ddl/create_consumer_complaint.sql");
+        if (mysqli_query($db, $sql) === TRUE) {
+        }else{
+            $mysqlError = true;
+            $mysqlErrorMessage = "Could not create consumer_complaint table";           
+        }  
+
+
+
+        if(!$mysqlError){
+
+            //PART 2: Query to load geography table
+            $sql = "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES"; 
+            mysql_query($sql) or die(mysql_error()); 
+
+            //lets check to see if data was loaded, noticed difference between windows/osx/linux
+            $sql = "SELECT count(*) as `count` FROM cfpb.geography"; 
+            $result = mysql_query($sql, $conn); 
+
+            $geographyTableRowCount = mysql_fetch_array( $result );
+
+            if ($geographyTableRowCount = 0) {
+                $sql = "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
+                mysql_query($sql) or die(mysql_error()); 
+            }
+
+
+            //PART 3: Query to load Estimates table
+            $sql = "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES"; 
+            mysql_query($sql) or die(mysql_error()); 
+
+            //lets check to see if data was loaded, noticed difference between windows/osx/linux
+            $sql = "SELECT count(*) as `count` FROM cfpb.acs_estimate"; 
+            $result = mysql_query($sql, $conn); 
+
+            $acsEstimateTableRowCount = mysql_fetch_array( $result );
+
+            if ($acsEstimateTableRowCount = 0) {
+                $sql = "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
+                mysql_query($sql) or die(mysql_error()); 
+            }
+
+
+
+
+            //PART 4: Query to load consumer complaints table
+            $sql = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES"; 
+            mysql_query($sql) or die(mysql_error()); 
+
+            //lets check to see if data was loaded, noticed difference between windows/osx/linux
+            $sql = "SELECT count(*) as `count` FROM cfpb.consumer_complaint"; 
+            $result = mysql_query($sql, $conn); 
+
+            $geographyTableRowCount = mysql_fetch_array( $result );
+
+            if ($geographyTableRowCount = 0) {
+                $sql = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES"; 
+                mysql_query($sql) or die(mysql_error()); 
+            }
+
+            
+        }
 
 
     }
@@ -195,13 +261,11 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <img style="padding:10px;" alt="Brand" src="./images/logo.jpg">
+          <a class="navbar-brand" href="#">David Larrimore Demo Site</a>
         </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse navbar-left" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li><p class="navbar-text">David Larrimore Demo Site</p></li>
-            <li><p class="navbar-text">/</li>
             <li><a href="mailto:davidlarrimore@gmail.com">davidlarrimore@gmail.com</a></li>
             <li><p class="navbar-text">/</li>
             <li><p class="navbar-text">(410) 598-6569</p></li>
@@ -216,13 +280,38 @@
       </div><!-- /.container-fluid -->
     </nav>
 
-
     <div class="container">
-            <div class="row">
+        <?php if($mysqlError){ ?>
+                <div class="row">&nbsp;</div>
+                <div class="row">
+                <div class="col-md-12">
+                    <div class="alert alert-danger alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <?php echo $mysqlErrorMessage;?>
+                    </div>
+                </div>
+            </div>
+        <?php } else if (!$mysqlError && !empty($_POST)) { ?>
+                <div class="row">&nbsp;</div>
+                <div class="row">
+                <div class="col-md-12">
+                    <div class="alert alert-success alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        Load Successful
+                    </div>
+                </div>
+            </div>
+        <?php } ?>
+
+        <div class="row">
             <div class="col-md-12"><div><h1>Administration</h1></div></div>
         </div>
         <div class="row">
-            <div class="col-md-12"><h3>Table Load Status</h3></div>
+            <div class="col-md-12"><h3>Configuration Status</h3></div>
         </div>
         <div class="row">
             <div class="col-md-6">

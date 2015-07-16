@@ -71,7 +71,7 @@ If using OSX to locally connect to MySQL database, use the following command to 
 
 
 
-
+LOAD DATA LOCAL INFILE '/Applications/XAMPP/xamppfiles/htdocs/cfpb/data/e20135us0015000-baked.csv' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES;
 
 
 
