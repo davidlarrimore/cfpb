@@ -1,0 +1,5 @@
+SELECT STATE,
+       NUMBER_OF_COMPLAINTS,
+       POPULATION,
+     COMPLAINT_RATIO
+  FROM consumer_acs_usa_ratio;
