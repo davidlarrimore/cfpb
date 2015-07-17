@@ -10,6 +10,7 @@ The Dashboard app consumes data from the API to present the data.
 
 **NOTE: This application works best in a modern web browser (aka > IE 9.0)**
 
+**[Demo](http://ec2-52-3-169-110.compute-1.amazonaws.com/cfpb/)**
 
 ##Installation and Setup
 
