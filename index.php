@@ -4,6 +4,8 @@
     include './helpers/dbconfig.php';
     mysqli_report(MYSQLI_REPORT_STRICT);
 
+    $mysqlError = false;
+    
     try {
          $db = new mysqli($hostname, $username, $password, $database);
 

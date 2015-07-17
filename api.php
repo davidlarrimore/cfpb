@@ -11,7 +11,7 @@
     include './helpers/dbconfig.php';
     mysqli_report(MYSQLI_REPORT_STRICT);
 
-
+    $mysqlError = false;
 	$db = new mysqli($hostname, $username, $password, $database);
 
 	if (isset($_GET["query"]) && !empty($_GET["query"])) {
