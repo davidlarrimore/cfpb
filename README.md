@@ -32,6 +32,14 @@ This was developed using the LAMPP Stack [XAMPP version 5.5.24](https://www.apac
 
 * [Use this link](http://howtoubuntu.org/how-to-install-lamp-on-ubuntu) to get the base install.
 * install git
+* Upgrade MySQL server to 5.6
+
+
+	sudo apt-get update
+	sudo apt-get upgrade
+	sudo apt-get install mysql-server-5.6
+
+
 * Navigate to /var/www/html/
 * Clone the repository
 
