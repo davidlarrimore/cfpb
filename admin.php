@@ -196,7 +196,7 @@
 
 
                 //PART 5: Query to load consumer complaints table
-                if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES") === TRUE) {
+                if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES") === TRUE) {
                 }else{
                     $mysqlError = true;
                     $mysqlErrorMessage = "Could not load consumer_complaint table";           
@@ -206,7 +206,7 @@
                     if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES") === TRUE) {
                     }else{
                         $mysqlError = true;
-                        $mysqlErrorMessage = "Could not drop load consumer_complaint table";           
+                        $mysqlErrorMessage = "Could not load consumer_complaint table";           
                     }       
                 }
 
