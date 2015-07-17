@@ -26,6 +26,7 @@ This was developed using the LAMPP Stack [XAMPP version 5.5.24](https://www.apac
 * SQLite 2.8.17/3.7.17 + multibyte (mbstring) support
 * Perl 5.16.3
 
+**Note**: Currently, both DB and Apache must exist on the same server due to the data loading mechanism that is currently being utilized.
 
 ### LAMPP Installation on Ubuntu 14.04
 
