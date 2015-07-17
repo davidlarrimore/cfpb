@@ -146,14 +146,14 @@
 
                 //PART 2: Query to load geography table
                 
-                if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES") === TRUE) {
+                if (mysqli_query($db, "LOAD DATA INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r' IGNORE 1 LINES") === TRUE) {
                 }else{
                     $mysqlError = true;
                     $mysqlErrorMessage = "Could not load geography table";           
                 }
 
                 if (getRowCount($db, "geography") == 0) {
-                    if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES") === TRUE) {
+                    if (mysqli_query($db, "LOAD DATA INFILE '".$geographyDataFile."' INTO TABLE cfpb.geography FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES") === TRUE) {
                     }else{
                         $mysqlError = true;
                         $mysqlErrorMessage = "Could not drop load geography table";           
@@ -163,14 +163,14 @@
 
 
                 //PART 3: Query to load Estimates table
-                if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES") === TRUE) {
+                if (mysqli_query($db, "LOAD DATA INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES") === TRUE) {
                 }else{
                     $mysqlError = true;
                     $mysqlErrorMessage = "Could not load acs_estimate table";           
                 }
 
                 if (getRowCount($db, "acs_estimate") == 0) {
-                    if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES") === TRUE) {
+                    if (mysqli_query($db, "LOAD DATA INFILE '".$acsEstimateDataFile."' INTO TABLE cfpb.acs_estimate FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES") === TRUE) {
                     }else{
                         $mysqlError = true;
                         $mysqlErrorMessage = "Could not drop load acs_estimate table";           
@@ -179,14 +179,14 @@
 
 
                 //PART 4: Query to load Margin of Error
-                if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES") === TRUE) {
+                if (mysqli_query($db, "LOAD DATA INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES") === TRUE) {
                 }else{
                     $mysqlError = true;
                     $mysqlErrorMessage = "Could not load acs_margin_of_error table";           
                 }
 
                 if (getRowCount($db, "acs_margin_of_error") == 0) {
-                    if (mysqli_query($db, "LOAD DATA LOCAL INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES") === TRUE) {
+                    if (mysqli_query($db, "LOAD DATA INFILE '".$acsMarginOfErrorDataFile."' INTO TABLE cfpb.acs_margin_of_error FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES") === TRUE) {
                     }else{
                         $mysqlError = true;
                         $mysqlErrorMessage = "Could not drop load acs_margin_of_error table";           
@@ -197,7 +197,7 @@
 
 
                 //PART 5: Query to load consumer complaints table
-                $query = "LOAD DATA LOCAL INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES";
+                $query = "LOAD DATA INFILE '".$consumerComplaintDataFile."' INTO TABLE cfpb.consumer_complaint FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n' IGNORE 1 LINES";
                 if (mysqli_query($db, $query) === TRUE) {
                 }else{
                     $mysqlError = true;
