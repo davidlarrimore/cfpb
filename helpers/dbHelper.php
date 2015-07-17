@@ -1,4 +1,5 @@
 <?php
+
     include './helpers/dbconfig.php';
 
     function getRowCount($db, $tableName) {
