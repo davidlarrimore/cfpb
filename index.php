@@ -1,6 +1,7 @@
 
 <?php
     include './helpers/dbHelper.php';
+    include './helpers/dbconfig.php';
     mysqli_report(MYSQLI_REPORT_STRICT);
 
     try {

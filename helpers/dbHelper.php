@@ -1,11 +1,5 @@
 <?php
-
-    $mysqlError = false;
-    $username = "cfpb";
-    $password = "cfpb";
-    $hostname = "localhost";
-    $database = "cfpb";
-
+    include './helpers/dbconfig.php';
 
     function getRowCount($db, $tableName) {
         $query = "SELECT count(*) as 'count' FROM cfpb.".$tableName.";";
