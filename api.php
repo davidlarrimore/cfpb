@@ -7,11 +7,8 @@
 * Queries are fed from the .sql files in the queries folder
 *
 */
-
-    $username = "cfpb";
-    $password = "cfpb";
-    $hostname = "localhost";
-    $database = "cfpb";
+    include './helpers/dbHelper.php';
+    mysqli_report(MYSQLI_REPORT_STRICT);
 
 
 	$db = new mysqli($hostname, $username, $password, $database);

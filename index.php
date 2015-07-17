@@ -1,10 +1,6 @@
 
 <?php
-    $mysqlError = false;
-    $username = "cfpb";
-    $password = "cfpb";
-    $hostname = "localhost";
-    $database = "cfpb";
+    include './helpers/dbHelper.php';
     mysqli_report(MYSQLI_REPORT_STRICT);
 
     try {

@@ -1,10 +1,5 @@
 <?php
     include './helpers/dbHelper.php';
-    $mysqlError = false;
-    $username = "cfpb";
-    $password = "cfpb";
-    $hostname = "localhost";
-    $database = "cfpb";
     mysqli_report(MYSQLI_REPORT_STRICT);
 
 
@@ -288,7 +283,7 @@
         //Checking for geo join index
         $geographyIndexCheck = false;
         if(validateIfTableIndexExists($db, "geography", "geo_join_index")){
-            $consumerComplaintTableCheck = true;
+            $geographyIndexCheck = true;
         }  
 
         //Checking for cc join index
