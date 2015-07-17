@@ -22,10 +22,7 @@
 		    }
 		    header('Content-Type: application/json');
 		    echo json_encode($myArray);
-		    $stmt->close();
-		} else {
-		    $stmt->close();
-		}
+		 }
 	}
 
 
