@@ -22,8 +22,8 @@
 		    }
 		    header('Content-Type: application/json');
 		    echo json_encode($myArray);
+		    $result->close();
 		}
-		$result->close();
 	}
 
 

@@ -36,23 +36,34 @@ This was developed using the LAMPP Stack [XAMPP version 5.5.24](https://www.apac
 
 	sudo git clone https://github.com/davidlarrimore/cfpb.git
 
+* Some install scripts do not include the mysqli install, so use the following command
+
+
+	sudo apt-get install php5-mysql
+
+
 * PHP.ini needs to be modified to support the amount of data that will be flowing through it. 512 should be enough for most operations.
+
 
 	sudo vi /etc/php5/apache2/php.ini
 
 	set memory_limit=512M
 
+
 * My.cnf needs to be modified to support the larger queries.
+
 
 	sudo vi /etc/mysql/my.cnf
 
 	change key_buffer              = 128M
-	add innodb_buffer_pool_size = 402653184
+
 
 * Once you are done both of these tasks, you should restart both services
 
+
 	sudo /etc/init.d/mysql restart 
 	sudo service apache2 restart
+
 
 * I have also found a lot of value in increasing the buffer pool size for mysql
 
