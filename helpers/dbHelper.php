@@ -58,4 +58,11 @@
         }
     }
 
+
+    function getQueryErrorMessage($db, $query){
+        if (!mysqli_query($db,$query)){
+          return "Query Error: " . mysqli_error($db));
+        }
+    }
+
 ?>
